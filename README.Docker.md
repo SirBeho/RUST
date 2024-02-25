@@ -20,3 +20,46 @@ docs for more detail on building and pushing.
 
 ### References
 * [Docker's Rust guide](https://docs.docker.com/language/rust/)
+
+
+
+
+ // Ejecutar la conexión en un hilo separado
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("Error de conexión: {}", e);
+        }
+    });
+
+    // Crear la tabla
+    client.batch_execute(sql!(
+        r#"
+        CREATE TABLE IF NOT EXISTS Clientes (
+            id SERIAL PRIMARY KEY,
+            nombre VARCHAR(255) NOT NULL
+        )
+        "#
+    )).await?;
+
+    println!("Tabla creada exitosamente");
+
+    // Insertar algunos datos
+    client.execute(
+        sql!("INSERT INTO Clientes (nombre) VALUES ('Ejemplo1'), ('Ejemplo2'), ('Ejemplo3')"),
+        &[],
+    ).await?;
+
+    println!("Datos insertados exitosamente");
+
+    // Consultar la tabla y mostrar los resultados
+    let rows = client.query(sql!("SELECT * FROM Clientes"), &[]).await?;
+
+    println!("Datos de la tabla:");
+
+    for row in &rows {
+        let id: i32 = row.get("id");
+        let nombre: &str = row.get("nombre");
+        println!("ID: {}, Nombre: {}", id, nombre);
+    }
+
+    Ok(())

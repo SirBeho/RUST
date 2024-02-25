@@ -47,6 +47,8 @@ COPY Cargo.lock /app/Cargo.lock
 
 RUN chmod -R +w /app
 
+
+
 RUN xx-cargo build --release --target-dir ./target && \
     cp ./target/$(xx-cargo --print-target-triple)/release/$APP_NAME /bin/server && \
     xx-verify /bin/server
@@ -80,7 +82,7 @@ USER appuser
 COPY --from=build /bin/server /bin/
 
 # Configure rocket to listen on all interfaces.
-ENV ROCKET_ADDRESS=0.0.0.0
+ENV ROCKET_ADDRESS=localhost
 
 # Expose the port that the application listens on.
 EXPOSE 8000
