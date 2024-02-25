@@ -1,17 +1,31 @@
-mod actions;
+use tokio_postgres::{NoTls, Error};
 
-use postgres::{Client, NoTls};
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    // Configuración de la conexión a la base de datos
+    let (client, connection) = tokio_postgres::connect(
+        "host=postgres-container user=benjamin password=1192141 dbname=tienda_db port=6001",
+        NoTls,
+    )
+    .await?;
 
-fn main() -> Result<(), postgres::Error> {
-    let database_url = "postgresql://benjamin:1192141@172.17.0.2:6001/clientes";
-    let mut client = Client::connect(database_url, NoTls)?;
+    // Manejar el resultado de la conexión
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("Error de conexión: {}", e);
+        }
+    });
 
-    // Crear la tabla
-    actions::create::create_table(&mut client)?;
-
-    // Operaciones en la tabla
-   // actions::create::insert_user(&mut client, "benjamin@gamil.com", "admin")?;
-   // actions::create::select_all(&mut client)?;
+    
+    // Ejemplo de consulta
+    let rows = client.query("SELECT id_cliente, nombre FROM cliente", &[]).await?;
+    
+    // Procesar resultados
+    for row in rows {
+        let id_cliente: i32 = row.get(0);
+        let nombre: &str = row.get(1);
+        println!("ID: {}, Nombre: {}", id_cliente, nombre);
+    }
 
     Ok(())
 }
