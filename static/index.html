@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Usuarios</title>
+    <title>Lista de Clientes</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4">Lista de Usuarios</h1>
+        <h1 class="mb-4">Lista de Clientes</h1>
         
-        <!-- Botón para agregar usuario -->
+        <!-- Botón para agregar cliente -->
         <button type="button"  onclick="agregar()"  class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalAgregar">
-            Agregar Usuario
+            Agregar Cliente
         </button>
 
         <table class="table">
@@ -29,17 +29,17 @@
         </table>
     </div>
 
-    <!-- Modal para agregar/editar usuario -->
+    <!-- Modal para agregar/editar cliente -->
     <div class="modal fade" id="modalAgregar" tabindex="-1" aria-labelledby="modalAgregarLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"  id="title_modal">Agregar Usuario</h5>
+                    <h5 class="modal-title"  id="title_modal">Agregar Cliente</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Contenido del formulario para agregar/editar usuario -->
-                    <form id="formularioUsuario">
+                    <!-- Contenido del formulario para agregar/editar cliente -->
+                    <form id="formularioCliente">
                         <input type="hidden" id="id" value="">
                         <!-- Campos del formulario -->
                         <div class="mb-3">
@@ -57,7 +57,7 @@
                         <!-- Botón de confirmar para agregar/editar -->
                         <div class="d-flex justify-content-around">
                             <button type="submit" onclick="" class="btn btn-success">Confirmar</button>
-                            <button type="button" onclick="limpiar" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close">Cancelar</button>
+                            <button type="button" onclick="limpiar()" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close">Cancelar</button>
 
                         </div>
 
@@ -67,10 +67,34 @@
         </div>
     </div>
 
+    <!-- Modal de confirmación para eliminar -->
+    <div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEliminarLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar a <span id="nombre-modal"> </span>?
+                </div>
+                <input type="hidden" id="id-modal" value="">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger"  data-bs-dismiss="modal" onclick="EliminarCliente()">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+          
+          
+        let clientes = {};
 
-        cargarUsuarios();
+        cargarClientes();
 
         function limpiar(){
             
@@ -80,97 +104,99 @@
             document.getElementById('telefono').value = '';
         }
 
+        function editarCliente(userId) {
+
+            limpiar();
+            document.getElementById('title_modal').innerHTML = 'Editar Cliente';
+            const cliente = clientes.find(cliente => cliente.id === userId);
+            document.getElementById('id').value = userId;
+            document.getElementById('nombre').value = cliente.nombre;
+            document.getElementById('correo').value = cliente.correo;
+            document.getElementById('telefono').value = cliente.telefono;
+
+            }
+     
         function agregar(){
           
             limpiar();
-            document.getElementById('title_modal').innerHTML = 'Agregar Usuario';
+            document.getElementById('title_modal').innerHTML = 'Agregar Cliente';
         }
 
-        let usuarios = {};
-        // Función para cargar la lista de usuarios
-        async function cargarUsuarios() {
+        function modaleliminarCliente(userId,nombre) {
+       
+           
+            document.getElementById('id-modal').value = userId;
+            document.getElementById('nombre-modal').innerHTML = nombre;
+        }
+       
+        async function cargarClientes() {
             try {
-                const response = await fetch('/usuarios', {
+                const response = await fetch('/clientes', {
                     method: 'POST',
                 });
-                usuarios = await response.json();
+                clientes = await response.json();
 
                 const tablaCuerpo = document.getElementById('user-table-body');
                 tablaCuerpo.innerHTML = '';  // Limpiar la tabla antes de agregar datos nuevos
 
-                // Llenar la tabla con los datos de los usuarios
-                usuarios.forEach(usuario => {
+                // Llenar la tabla con los datos de los clientes
+                clientes.forEach(cliente => {
                 
                     const fila = document.createElement('tr');
-                    fila.innerHTML = `<td>${usuario.id}</td><td>${usuario.nombre}</td><td>${usuario.correo}</td><td>${usuario.telefono}</td><td>
-                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalAgregar" onclick="editarUsuario(${usuario.id})">Editar</button>
+                    fila.innerHTML = `<td>${cliente.id}</td><td onclick="modaleliminarCliente(${cliente.id},${cliente.nombre})" >${cliente.nombre}</td><td>${cliente.correo}</td><td>${cliente.telefono}</td><td>
+                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalAgregar" onclick="editarCliente(${cliente.id})">Editar</button>
 
-                        <button type="button" class="btn btn-danger btn-sm" onclick="eliminarUsuario(${usuario.id})">Eliminar</button>
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalEliminar" onclick="modaleliminarCliente(${cliente.id},'${cliente.nombre}')">Eliminar</button>
                     </td>`;
                     tablaCuerpo.appendChild(fila);
                 });
             } catch (error) {
-                console.error('Error al cargar usuarios:', error);
+                console.error('Error al cargar clientes:', error);
             }
         }
 
-        // Llamar a la función al cargar la página
-      
-
-        // Función para editar un usuario (abre el modal con los datos del usuario , redibe un objeto usuario)
-        function editarUsuario(userId) {
-
-            limpiar();
-            document.getElementById('title_modal').innerHTML = 'Editar Usuario';
-            const usuario = usuarios.find(usuario => usuario.id === userId);
-            document.getElementById('id').value = userId;
-            document.getElementById('nombre').value = usuario.nombre;
-            document.getElementById('correo').value = usuario.correo;
-            document.getElementById('telefono').value = usuario.telefono;
-
-        }
-
-        
-       
-
-        // Función para eliminar un usuario
-        async function eliminarUsuario(id) {
+        async function EliminarCliente() {
+            const id = document.getElementById('id-modal').value;
+                console.log(id)
             try {
-                const response = await fetch(`/usuarios/${id}`, {
+                const response = await fetch(`/clientes/${id}`, {
                     method: 'DELETE',
                 });
                 // Actualizar la tabla después de eliminar
-                cargarUsuarios();
+                cargarClientes();
             } catch (error) {
-                console.error('Error al eliminar usuario:', error);
+                console.error('Error al eliminar cliente:', error);
             }
         }
 
-        // Manejar el envío del formulario (agregar/editar usuario)
-        document.getElementById('formularioUsuario').addEventListener('submit', async function(event) {
+        // Manejar el envío del formulario (agregar/editar cliente)
+        document.getElementById('formularioCliente').addEventListener('submit', async function(event) {
             event.preventDefault();
-          
-            const id = document.getElementById('id').value || 0;
+
+            const id = parseInt( document.getElementById('id').value || 0);
             const nombre = document.getElementById('nombre').value;
             const correo = document.getElementById('correo').value;
             const telefono = document.getElementById('telefono').value;
 
             try {
-                const response = await fetch('/usuarios/${id}', {
+                const response = await fetch(`/clientes/${id}`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({id,nombre, correo, telefono}),
                 });
+                console.log(response)
                 // Cerrar el modal después de agregar/editar
                 document.getElementById('modalAgregar').classList.remove('show');
                 document.body.classList.remove('modal-open');
                 document.querySelector('.modal-backdrop').remove();
                 // Actualizar la tabla después de agregar/editar
-                cargarUsuarios();
+                cargarClientes();
             } catch (error) {
-                console.error('Error al agregar/editar usuario:', error);
+                console.error('Error al agregar/editar cliente:', error);
             }
         });
+
+
     </script>
 </body>
 </html>

@@ -173,6 +173,7 @@ dependencies = [
  "log",
  "postgres",
  "serde",
+ "serde_json",
  "tokio",
  "tokio-postgres",
  "warp",
