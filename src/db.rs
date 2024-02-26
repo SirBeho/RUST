@@ -3,6 +3,8 @@ use tokio::sync::Mutex;
 use std::sync::Arc;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
+
 
 
 
@@ -25,6 +27,8 @@ pub async fn initialize_connection() -> Result<(), tokio_postgres::Error> {
     )
     .await
     {
+
+        
         Ok((new_client, connection)) => {
             tokio::spawn(async move {
                 if let Err(e) = connection.await {
@@ -37,6 +41,7 @@ pub async fn initialize_connection() -> Result<(), tokio_postgres::Error> {
         }
         Err(e) => {
             eprintln!("Error al conectar a la base de datos: {:?}", e);
+            tokio::time::sleep(Duration::from_secs(8)).await; 
             Err(e)
         }
     }

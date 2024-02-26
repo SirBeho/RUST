@@ -85,7 +85,11 @@ COPY --from=build /bin/server /bin/
 ENV ROCKET_ADDRESS=localhost
 
 # Expose the port that the application listens on.
-EXPOSE 8000
+# Configura el puerto de la aplicación
+ENV PORT 6001
+
+# Expone el puerto que utiliza tu aplicación
+EXPOSE $PORT
 
 # What the container should run when it is started.
-CMD ["/bin/server"]
+CMD ["/bin/server", "--port", "$PORT"]
