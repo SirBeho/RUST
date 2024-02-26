@@ -16,21 +16,27 @@ pub struct Usuario {
 }
 
 pub async fn initialize_connection() -> Result<(), tokio_postgres::Error> {
-    let (new_client, connection) = tokio_postgres::connect(
-        "host=postgres-container user=benjamin password=1192141 dbname=tienda_db port=6001",
+    match tokio_postgres::connect(
+        "host=localhost user=benjamin password=1192141 dbname=tienda_db port=6001",
         NoTls,
     )
-    .await?;
+    .await
+    {
+        Ok((new_client, connection)) => {
+            tokio::spawn(async move {
+                if let Err(e) = connection.await {
+                    eprintln!("Error de conexión: {}", e);
+                }
+            });
 
-    tokio::spawn(async move {
-        if let Err(e) = connection.await {
-            eprintln!("Error de conexión: {}", e);
+            *CLIENT.lock().await = Some(new_client);
+            Ok(())
         }
-    });
-
-    *CLIENT.lock().await = Some(new_client);
-
-    Ok(())
+        Err(e) => {
+            eprintln!("Error al conectar a la base de datos: {:?}", e);
+            Err(e)
+        }
+    }
 }
 
 pub async fn get_users() -> Result<Vec<Usuario>, tokio_postgres::Error> {

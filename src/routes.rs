@@ -22,29 +22,3 @@ pub async fn crear_rutas() -> impl Filter<Extract = impl warp::Reply, Error = wa
     ruta_ver_todos.or(ruta_static).or(ruta_inicio)
 }
 
-
-
-/*
-let route_users = warp::path!("usuarios")
-     .and(warp::post())
-     .and_then(|| async move {
-                 let result = db::get_users().await;
-         match result {
-             Ok(usuarios) => {
-                 // Convertir los usuarios a JSON y responder
-                 let json_response = warp::reply::json(&usuarios);
-                 Ok(json_response)
-             }
-             Err(error) => {
-                 // Manejar el error y responder con un código de error
-                 eprintln!("Error al obtener usuarios: {}", error);
-                 let error_response = warp::reply::with_status(
-                     warp::reply::json(&"Error interno del servidor"),
-                     warp::http::StatusCode::INTERNAL_SERVER_ERROR,
-                 );
-                 Ok(error_response)
-             }
-         }
-     })
-
-     */
