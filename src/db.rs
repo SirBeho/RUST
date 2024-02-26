@@ -21,10 +21,11 @@ pub struct Cliente {
 }
 
 pub async fn initialize_connection() -> Result<(), tokio_postgres::Error> {
-    match tokio_postgres::connect(
-        "host=postgres-container user=benjamin password=1192141 dbname=tienda_db port=6001",
-        NoTls,
-    )
+
+    let database_url = env::var("DATABASE_URL").expect("La variable de entorno DATABASE_URL no está configurada.");
+
+
+    let (client, connection) = tokio_postgres::connect(&database_url, NoTls)
     .await
     {
 
