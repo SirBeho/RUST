@@ -87,3 +87,5 @@ docker run -p 8080:8080 --network mi_red_docker rust-app
 ```
 
 La aplicación estará disponible en http://localhost:8080.
+
+docker-compose up -d db

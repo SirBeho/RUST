@@ -20,6 +20,9 @@ FROM --platform=$BUILDPLATFORM rust:${RUST_VERSION}-alpine AS build
 ARG APP_NAME
 WORKDIR /app
 
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
 # Copy cross compilation utilities from the xx stage.
 COPY --from=xx / /
 
