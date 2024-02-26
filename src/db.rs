@@ -16,8 +16,9 @@ pub struct Usuario {
 }
 
 pub async fn initialize_connection() -> Result<(), tokio_postgres::Error> {
+    
     match tokio_postgres::connect(
-        "host=localhost user=benjamin password=1192141 dbname=tienda_db port=6001",
+        "host=postgres-container user=benjamin password=1192141 dbname=tienda_db port=5432",
         NoTls,
     )
     .await
