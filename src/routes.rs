@@ -32,7 +32,6 @@ pub async fn crear_rutas() -> impl Filter<Extract = impl warp::Reply, Error = wa
     .and(warp::body::json())
     .and_then(|id: i32, cliente: db::Cliente| async move {
 
-        println!("ID: {:?}", id);
         let result ;
         
         if id == 0 {
@@ -43,12 +42,6 @@ pub async fn crear_rutas() -> impl Filter<Extract = impl warp::Reply, Error = wa
             result = db::update_cliente(id, cliente).await;
         }
        
-        
-        println!("Resultado: {:?}", result);
-       
-
-
-
         match result {
             Ok(_) => Ok::<_, warp::Rejection>(warp::reply::json(&"Usuario agregado")),
             Err(_) => Ok::<_, warp::Rejection>(warp::reply::json(&"Error interno del servidor")),

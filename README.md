@@ -83,7 +83,7 @@ docker build -t rust-app .
 
 Ejecuta la aplicación Rust dentro de un contenedor:
 ```bash
-docker run -p 8080:3030 --network mi_red_docker rust-app
+docker run -p 8080:8080 --network mi_red_docker rust-app
 ```
 
 La aplicación estará disponible en http://localhost:8080.

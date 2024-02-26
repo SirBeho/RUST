@@ -8,8 +8,7 @@ async fn main() {
         eprintln!("Error al inicializar la conexión: {}", e);
         return;
     }
-
-    // Define tus rutas usando Warp
+  // Define tus rutas usando Warp
     let routes = routes::crear_rutas().await;
 
     // Inicia el servidor usando Warp
