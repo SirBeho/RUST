@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: 1192141
+      POSTGRES_USER: benjamin
+      POSTGRES_DB: tienda_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/create_tables.sql # Mount the initialization scripts
+
+  rust_api:
+    container_name: rust
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

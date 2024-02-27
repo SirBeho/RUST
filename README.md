@@ -70,7 +70,7 @@ Asegúrate de tener instalados los siguientes componentes antes de ejecutar la a
 Ejecuta el siguiente comando para iniciar un contenedor de PostgreSQL:
 
 ```bash
-docker run --name postgres-container -e POSTGRES_USER=benjamin -e POSTGRES_PASSWORD=1192141 -e POSTGRES_DB=tienda_db -p 6001:5432 --network mi_red_docker -d postgres
+docker run --name postgres-container -e POSTGRES_USER=benjamin -e POSTGRES_PASSWORD=1192141 -e POSTGRES_DB=tienda_db -p 5432:5432 --network mi_red_docker -d postgres
 ```
 Asegúrate de que la red (mi_red_docker en este ejemplo) esté configurada correctamente.
 

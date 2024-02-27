@@ -1,19 +1,28 @@
-mod routes;
-mod db;
+mod routes;  
 
-#[tokio::main]
-async fn main() {
-    // Llama a tu función de inicialización aquí
-    /*
-    if let Err(e) = db::initialize_connection().await {
-        eprintln!("Error al inicializar la conexión: {}", e);
-        return;
-    }
-    */
-  // Define tus rutas usando Warp
-    let routes = routes::crear_rutas().await;
 
-    // Inicia el servidor usando Warp
-    warp::serve(routes).run(([0, 0, 0, 0], 6001)).await;
+use routes::{get_users, create_or_update_user, delete_user};
+use actix_web::{ App,  HttpServer};
+use actix_files::Files;
 
+
+#[derive(Debug)]
+struct AppState;
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+
+
+    HttpServer::new(|| {
+        App::new()
+        .service(Files::new("/", "./static").index_file("index.html"))
+        .service(get_users)
+        .service(create_or_update_user)
+        .service(delete_user)
+    })
+    .bind("0.0.0.0:8080")?
+    .run()
+    .await
 }
+
+
