@@ -4,7 +4,7 @@ use tokio_postgres::{NoTls, Error,Client};
 async fn main() -> Result<(), Error> {
     // Configuración de la conexión a la base de datos
     let (client, connection) = tokio_postgres::connect(
-        "host=postgres-container user=benjamin password=1192141 dbname=tienda_db port=5432",
+        "host=localhost user=benjamin password=1192141 dbname=tienda_db port=5432",
         NoTls,
     )
     .await?;
@@ -16,6 +16,10 @@ async fn main() -> Result<(), Error> {
         }
     });
 
+    if let Err(e) = crear_tabla(&client).await {
+        eprintln!("Error al llamar datos: {}", e);
+    }
+
     if let Err(e) = llamar_datos(&client).await {
         eprintln!("Error al llamar datos: {}", e);
     }
@@ -23,6 +27,36 @@ async fn main() -> Result<(), Error> {
     
     Ok(())
 }
+
+//crear tabla e insertar datos por defecto
+async fn crear_tabla(client: &Client) -> Result<(), Error> {
+  
+
+    client
+        .execute(
+            "CREATE TABLE IF NOT EXISTS cliente (
+                id_cliente SERIAL PRIMARY KEY,
+                nombre VARCHAR(50) NOT NULL,
+                correo VARCHAR(50) NOT NULL,
+                telefono VARCHAR(50) NOT NULL
+            )",
+            &[],
+        )
+        .await?;
+
+    client
+        .execute(
+            "INSERT INTO cliente (nombre, correo, telefono) values ('Benjamin', 'jose', '12345678')",
+            &[],
+        )
+        .await?;
+    Ok(())
+}
+
+           
+
+
+
 
 async fn llamar_datos(client: &Client) -> Result<(), Error> {
 
