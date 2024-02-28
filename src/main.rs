@@ -1,73 +1,55 @@
-use tokio_postgres::{NoTls, Error,Client};
+mod controllers;
+use actix_web::{web, App, HttpServer};
+use std::io;
+use std::sync::{Arc, Mutex};
+use tokio_postgres::{NoTls};
 
-#[tokio::main]
-async fn main() -> Result<(), Error> {
-    // Configuración de la conexión a la base de datos
-    let (client, connection) = tokio_postgres::connect(
-        "host=localhost user=benjamin password=1192141 dbname=tienda_db port=5432",
-        NoTls,
-    )
-    .await?;
 
-    // Manejar el resultado de la conexión
-    tokio::spawn(async move {
+#[macro_use]
+extern crate serde_derive;
+
+const DB_URL: &str = env!("DATABASE_URL");
+
+
+#[actix_web::main]
+async fn main() -> io::Result<()> {
+    let (client, connection) = tokio_postgres::connect(DB_URL, NoTls).await.map_err(|err| {
+        eprintln!("Error connecting to PostgreSQL: {}", err);
+        io::Error::new(io::ErrorKind::Other, "PostgreSQL Connection Error")
+    })?;
+
+    // Spawn a runtime for handling the database connection
+    tokio::spawn(async {
         if let Err(e) = connection.await {
-            eprintln!("Error de conexión: {}", e);
+            eprintln!("Error connecting to PostgreSQL: {}", e);
         }
     });
 
-    if let Err(e) = crear_tabla(&client).await {
-        eprintln!("Error al llamar datos: {}", e);
-    }
+    let db_client = Arc::new(Mutex::new(client));
 
-    if let Err(e) = llamar_datos(&client).await {
-        eprintln!("Error al llamar datos: {}", e);
-    }
+    controllers::init(web::Data::new(db_client.clone())).await.unwrap();
 
-    
-    Ok(())
+    //.data(db_client.clone())
+    // Configura el servidor Actix Web
+    HttpServer::new(move || {
+        App::new()
+        
+            .app_data(web::Data::new(db_client.clone()))
+            .service(web::resource("/").to(controllers::index))
+            .route("/users", web::get().to(controllers::get_users))
+            .route("/users/{id}", web::post().to(controllers::save_user))
+            .route("/users/{id}", web::delete().to(controllers::delete_user))
+        
+    })
+    .bind("0.0.0.0:8080")?
+    .run()
+    .await
+    .map_err(|err| {
+        eprintln!("Error starting Actix Web server: {}", err);
+        err
+    })
 }
 
-//crear tabla e insertar datos por defecto
-async fn crear_tabla(client: &Client) -> Result<(), Error> {
-  
-
-    client
-        .execute(
-            "CREATE TABLE IF NOT EXISTS cliente (
-                id_cliente SERIAL PRIMARY KEY,
-                nombre VARCHAR(50) NOT NULL,
-                correo VARCHAR(50) NOT NULL,
-                telefono VARCHAR(50) NOT NULL
-            )",
-            &[],
-        )
-        .await?;
-
-    client
-        .execute(
-            "INSERT INTO cliente (nombre, correo, telefono) values ('Benjamin', 'jose', '12345678')",
-            &[],
-        )
-        .await?;
-    Ok(())
-}
-
-           
 
 
 
-
-async fn llamar_datos(client: &Client) -> Result<(), Error> {
-
-    let rows = client.query("SELECT id_cliente,nombre, correo , telefono FROM cliente", &[]).await?;
-
-    for row in rows {
-        let id_cliente: i32 = row.get(0);
-        let nombre: &str = row.get(1);
-        let correo: &str = row.get(2);
-        let telefono: &str = row.get(3);
-        println!("ID: {}, Nombre: {}, Correo: {}, Telefono: {}", id_cliente, nombre, correo, telefono);
-    }
-       Ok(())
-}
